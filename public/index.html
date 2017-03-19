@@ -65,6 +65,7 @@
         <li><a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a></li>
       </ul>
     </div>
+
   </body>
 </html>
 
@@ -126,9 +127,12 @@
 
   }
 
+
+
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       // User is signed in.
+      console.log(user);
 
       if (user != null) {
         user.providerData.forEach(function (profile) {
@@ -139,6 +143,15 @@
           console.log("  Photo URL: "+profile.photoURL);
         });
 
+        var currentdate = new Date();
+        var datetime = currentdate.getDate() + "/"
+                        + (currentdate.getMonth()+1)  + "/"
+                        + currentdate.getFullYear() + " @ "
+                        + currentdate.getHours() + ":"
+                        + currentdate.getMinutes() + ":"
+                        + currentdate.getSeconds();
+
+
         var contactsRef = rootRef.child('users');
         contactsRef
         .push({
@@ -148,11 +161,29 @@
                 city: 'The Internet',
                 state: 'The Internet',
                 zip: '127.0.0.1'
-            }
+            },
+            time: datetime
         })
       }
 
       var user = firebase.auth().currentUser;
+
+      // console.log(navigator.geolocation)
+      //
+      // function getLocation() {
+      //     if (navigator.geolocation) {
+      //         navigator.geolocation.getCurrentPosition(showPosition);
+      //     } else {
+      //         loc.innerHTML = "Geolocation is not supported by this browser.";
+      //     }
+      //     console.log(navigator.geolocation.getCurrentPosition(UserLocation));
+      // }
+      //
+      // function showPosition(position) {
+      //     loc.innerHTML = "Latitude: " + position.coords.latitude +
+      //     "<br>Longitude: " + position.coords.longitude;
+      //     console.log('loc' + location)
+      // }
 
       //send email verification...
       // user.sendEmailVerification().then(function() {
@@ -170,6 +201,11 @@
   var user = firebase.auth().currentUser;
 
 
+  firebase.auth().signOut().then(function() {
+    // Sign-out successful.
+  }).catch(function(error) {
+    // An error happened.
+  });
 
 
 
