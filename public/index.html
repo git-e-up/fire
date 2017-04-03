@@ -60,6 +60,9 @@
         border-radius: 50%;
         float: right;
       }
+      .small-rect {
+        width: 50px;
+      }
     </style>
   </head>
   <body>
@@ -71,10 +74,13 @@
         <li><a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a></li>
       </ul>
     </div>
-
+    <div>
       Write a message: <input id="messageField" type="text" name="message"><br>
       <input type="submit" value="Submit" onclick="writeUserInput()">
+    </div>
+    <ul id="other-messages">
 
+    </ul>
 
   </body>
 </html>
@@ -222,14 +228,17 @@
 
   function writeUserInput() {
     var userName = firebase.auth().currentUser.displayName;
+    var userPhoto = firebase.auth().currentUser.photoURL;
     var messageVal = messageField.value;
     var messagesRef = rootRef.child('messages');
     messagesRef.push({
-      message: messageVal,
-      username: userName
+      userphoto: userPhoto,
+      username: userName,
+      message: messageVal
     })
     //
 
+    var list = document.getElementById('other-messages');
     //
     rootRef.once("value")
     .then(function(snapshot) {
@@ -240,15 +249,60 @@
       for (var key in snapshot.child('messages').val()) {
          if (snapshot.child('messages').val().hasOwnProperty(key)) {
             var obj = snapshot.child('messages').val()[key];
+            var line = document.createElement("li");
+            list.appendChild(line);
+            var lineUser = document.createElement("div");
+            var lineMessage = document.createElement("div");
+            var linePhoto = document.createElement("div");
+            line.appendChild(linePhoto);
+            line.appendChild(lineUser);
+            line.appendChild(lineMessage);
+
             for (var prop in obj) {
-               if (obj.hasOwnProperty(prop)) {
-                  console.log(prop + " = " + obj[prop]);
+               if (obj.hasOwnProperty(prop) && obj[prop].length) {
+                  // console.log(prop + " = " + obj[prop]);
+                  // var lineChildren = document.createElement("div");
+
+                  if (prop == "username"){
+                      lineUser.innerHTML = "user name: " + obj[prop];
+                      // line.appendChild(lineUser)
+                  }
+                  else if (prop == "message") {
+                    lineMessage.innerHTML = "message: " + obj[prop];
+                    // line.appendChild(lineMessage);
+                  }
+                  else if (prop == 'userphoto') {
+                    linePhoto.innerHTML = '<img class="small-rect" src="'+ obj[prop] + '">'
+                    // line.appendChild(linePhoto);
+                  }
+
                }
             }
          }
       }
 
     })
+
+    rootRef.on("child_added", function(snapshot, prevChildKey) {
+      var newPost = snapshot.val();
+      console.log('new post ' + newPost);
+      // console.log("Author: " + snapshot.child('messages').val());
+      // // console.log("Title: " + newPost.title);
+      // console.log("Previous Post ID: " + prevChildKey);
+
+
+      // var obj = snapshot.child('messages').val()[key];
+      // for (var key in snapshot.child('messages').val()) {
+      //   for (var prop in obj) {
+      //      if (obj.hasOwnProperty(prop) && obj[prop].length) {
+      //         console.log(prop + " = " + obj[prop]);
+      //         // var line = document.createElement("li");
+      //         // line.innerHTML = obj[prop];
+      //         // list.appendChild(line);
+      //      }
+      //   }
+      // }
+    });
 
 
   }
