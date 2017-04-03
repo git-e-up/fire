@@ -228,16 +228,31 @@
       message: messageVal,
       username: userName
     })
-            console.log(rootRef.child('messages').child('message').orderByValue());
+    //
+
+    //
+    rootRef.once("value")
+    .then(function(snapshot) {
+      //below returns entire object of objects
+      // console.log(snapshot.child('messages').val())
+
+      //this returns all key:value pairs:
+      for (var key in snapshot.child('messages').val()) {
+         if (snapshot.child('messages').val().hasOwnProperty(key)) {
+            var obj = snapshot.child('messages').val()[key];
+            for (var prop in obj) {
+               if (obj.hasOwnProperty(prop)) {
+                  console.log(prop + " = " + obj[prop]);
+               }
+            }
+         }
+      }
+
+    })
+
+
   }
 
-  // var db = firebase.database();
-
-  // ref.orderByValue().on("value", function(snapshot) {
-  //   snapshot.forEach(function(data) {
-  //     console.log("The " + data.key + " dinosaur's score is " + data.val());
-  //   });
-  // });
 
 
   firebase.auth().signOut().then(function() {
