@@ -60,6 +60,14 @@
         border-radius: 50%;
         float: right;
       }
+      .message-item {
+        margin-bottom: 30px;
+        border: 1px solid #000;
+      }
+      .new-item {
+        margin-bottom: 30px;
+        border: 1px solid pink;
+      }
       .small-rect {
         width: 50px;
       }
@@ -217,13 +225,61 @@
       // }, function(error) {
       //   // An error happened.
       // });
+      var list = document.getElementById('other-messages');
+      //
+      rootRef.once("value")
+      .then(function(snapshot) {
+        //below returns entire object of objects
+        // console.log(snapshot.child('messages').val())
+
+        //this returns all key:value pairs:
+        for (var key in snapshot.child('messages').val()) {
+           if (snapshot.child('messages').val().hasOwnProperty(key)) {
+              var obj = snapshot.child('messages').val()[key];
+              var line = document.createElement("li");
+              line.className = "message-item";
+              list.appendChild(line);
+              var lineUser = document.createElement("div");
+              var lineMessage = document.createElement("div");
+              var linePhoto = document.createElement("div");
+              line.appendChild(linePhoto);
+              line.appendChild(lineUser);
+              line.appendChild(lineMessage);
+
+              for (var prop in obj) {
+                 if (obj.hasOwnProperty(prop) && obj[prop].length) {
+                    // console.log(prop + " = " + obj[prop]);
+                    if (prop == "username"){
+                        lineUser.innerHTML = "user name: " + obj[prop];
+                    }
+                    else if (prop == "message") {
+                      lineMessage.innerHTML = "message: " + obj[prop];
+                    }
+                    else if (prop == 'userphoto') {
+                      linePhoto.innerHTML = '<img class="small-rect" src="'+ obj[prop] + '">'
+                    }
+                 }
+              }
+           }
+        }
+      })
+      rootRef.limitToLast(1).on("value", function(snapshot, prevChildKey) {
+        var newPost = snapshot.val();
+        console.log(newPost);
+        // console.log(snapshot.child('messages').val());
+        // // console.log("Title: " + newPost.title);
+        // console.log("Previous Post ID: " + prevChildKey);
+      });
+
     } else {
       // No user is signed in.
-      console.log('no');
+      // console.log('no');
     }
   });
 
   var user = firebase.auth().currentUser;
+
+
 
 
   function writeUserInput() {
@@ -236,74 +292,34 @@
       username: userName,
       message: messageVal
     })
-    //
 
     var list = document.getElementById('other-messages');
     //
-    rootRef.once("value")
-    .then(function(snapshot) {
-      //below returns entire object of objects
-      // console.log(snapshot.child('messages').val())
-
-      //this returns all key:value pairs:
-      for (var key in snapshot.child('messages').val()) {
-         if (snapshot.child('messages').val().hasOwnProperty(key)) {
-            var obj = snapshot.child('messages').val()[key];
-            var line = document.createElement("li");
-            list.appendChild(line);
-            var lineUser = document.createElement("div");
-            var lineMessage = document.createElement("div");
-            var linePhoto = document.createElement("div");
-            line.appendChild(linePhoto);
-            line.appendChild(lineUser);
-            line.appendChild(lineMessage);
-
-            for (var prop in obj) {
-               if (obj.hasOwnProperty(prop) && obj[prop].length) {
-                  // console.log(prop + " = " + obj[prop]);
-                  // var lineChildren = document.createElement("div");
-
-                  if (prop == "username"){
-                      lineUser.innerHTML = "user name: " + obj[prop];
-                      // line.appendChild(lineUser)
-                  }
-                  else if (prop == "message") {
-                    lineMessage.innerHTML = "message: " + obj[prop];
-                    // line.appendChild(lineMessage);
-                  }
-                  else if (prop == 'userphoto') {
-                    linePhoto.innerHTML = '<img class="small-rect" src="'+ obj[prop] + '">'
-                    // line.appendChild(linePhoto);
-                  }
-
-               }
-            }
-         }
-      }
-
-    })
-
-    rootRef.on("child_added", function(snapshot, prevChildKey) {
+    var messagesRef = firebase.database().ref("messages/");
+    messagesRef.limitToLast(1).on("child_added", function(snapshot, prevChildKey) {
       var newPost = snapshot.val();
-      console.log('new post ' + newPost);
-      // console.log("Author: " + snapshot.child('messages').val());
-      // // console.log("Title: " + newPost.title);
-      // console.log("Previous Post ID: " + prevChildKey);
+      // console.log(prevChildKey);
+      console.log(newPost.message);
 
+      var line = document.createElement("li");
+      line.className = "new-item";
 
-      // var obj = snapshot.child('messages').val()[key];
-      // for (var key in snapshot.child('messages').val()) {
-      //   for (var prop in obj) {
-      //      if (obj.hasOwnProperty(prop) && obj[prop].length) {
-      //         console.log(prop + " = " + obj[prop]);
-      //         // var line = document.createElement("li");
-      //         // line.innerHTML = obj[prop];
-      //         // list.appendChild(line);
-      //      }
-      //   }
-      // }
+      var linePhoto = document.createElement("div");
+      linePhoto.innerHTML = '<img class="small-rect" src="'+ newPost.userphoto + '">'
+      line.appendChild(linePhoto);
+
+      var lineUser = document.createElement("div");
+      lineUser.innerHTML = "user name: " + newPost.username;
+      line.appendChild(lineUser);
+
+      var lineMessage = document.createElement("div");
+      lineMessage.innerHTML = "message: " + newPost.message;
+      line.appendChild(lineMessage);
+
+      // line.innerHTML = "message: " + newPost.message;
+      list.appendChild(line);
+
     });
-
 
   }
 
