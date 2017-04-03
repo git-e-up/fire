@@ -72,6 +72,9 @@
       </ul>
     </div>
 
+      Write a message: <input id="messageField" type="text" name="message"><br>
+      <input type="submit" value="Submit" onclick="writeUserInput()">
+
 
   </body>
 </html>
@@ -92,6 +95,7 @@
   var database = firebase.database();
   var rootRef = firebase.database().ref()
 
+
   function writeUserData(userId, name, email, imageUrl) {
     firebase.database().ref('users/' + userId).set({
       username: name,
@@ -99,6 +103,13 @@
       profile_picture : imageUrl
     });
   }
+
+
+  var messageField = document.getElementById("messageField");
+
+
+
+
 
 
   var provider = new firebase.auth.GoogleAuthProvider();
@@ -132,14 +143,18 @@
                      // this value to authenticate with your backend server, if
                      // you have one. Use User.getToken() instead.
 
+
+
   }
 
 
 
+
+
   firebase.auth().onAuthStateChanged(function(user) {
+
     if (user) {
       // User is signed in.
-      console.log(user);
 
       if (user != null) {
         user.providerData.forEach(function (profile) {
@@ -150,6 +165,7 @@
           console.log("  Photo URL: "+profile.photoURL);
 
           document.getElementById("profile-photo").src=profile.photoURL;
+
         });
 
 
@@ -175,26 +191,18 @@
             },
             time: datetime
         })
+
+        // var reff = firebase.database().ref('messages');
+
       }
+      // rootRef.on("value", function(snapshot) {
+      //   console.log('snapshot stuff '+ snapshot.val());
+      // }, function (errorObject) {
+      //   console.log("The read failed: " + errorObject.code);
+      // });
 
       var user = firebase.auth().currentUser;
 
-      // console.log(navigator.geolocation)
-      //
-      // function getLocation() {
-      //     if (navigator.geolocation) {
-      //         navigator.geolocation.getCurrentPosition(showPosition);
-      //     } else {
-      //         loc.innerHTML = "Geolocation is not supported by this browser.";
-      //     }
-      //     console.log(navigator.geolocation.getCurrentPosition(UserLocation));
-      // }
-      //
-      // function showPosition(position) {
-      //     loc.innerHTML = "Latitude: " + position.coords.latitude +
-      //     "<br>Longitude: " + position.coords.longitude;
-      //     console.log('loc' + location)
-      // }
 
       //send email verification...
       // user.sendEmailVerification().then(function() {
@@ -210,6 +218,26 @@
   });
 
   var user = firebase.auth().currentUser;
+
+
+  function writeUserInput() {
+    var userName = firebase.auth().currentUser.displayName;
+    var messageVal = messageField.value;
+    var messagesRef = rootRef.child('messages');
+    messagesRef.push({
+      message: messageVal,
+      username: userName
+    })
+            console.log(rootRef.child('messages').child('message').orderByValue());
+  }
+
+  // var db = firebase.database();
+
+  // ref.orderByValue().on("value", function(snapshot) {
+  //   snapshot.forEach(function(data) {
+  //     console.log("The " + data.key + " dinosaur's score is " + data.val());
+  //   });
+  // });
 
 
   firebase.auth().signOut().then(function() {
