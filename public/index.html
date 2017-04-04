@@ -84,6 +84,11 @@
       </ul>
     </div>
     <div>
+      Email: <input id="address" type="text" name="address"><br>
+      P/W:  <input id="pw" type="text" name="pw"><br>
+      <input type="submit" value="Submit" onclick="signup()">
+    </div>
+    <div>
       Write a message: <input id="messageField" type="text" name="message"><br>
       <input type="submit" value="Submit" onclick="writeUserInput()">
     </div>
@@ -129,24 +134,53 @@
 
   var provider = new firebase.auth.GoogleAuthProvider();
 
-  // provider.addScope('https://www.googleapis.com/auth/plus.login');
-  function signin() {
-    firebase.auth().signInWithPopup(provider).then(function(result) {
+  function signup(){
+    var email = document.getElementById("address").value;
+
+    var password = document.getElementById("pw").value;
+
+    firebase.auth().createUserWithEmailAndPassword(email, password).then(function(result) {
       // This gives you a Google Access Token. You can use it to access the Google API.
       var token = result.credential.accessToken;
       // The signed-in user info.
       var user = result.user;
+
+      alert('fdsfdsfds');
       // ...
     }).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
       var errorMessage = error.message;
-      // The email of the user's account used.
-      var email = error.email;
-      // The firebase.auth.AuthCredential type that was used.
-      var credential = error.credential;
+      console.log(errorMessage);
+      alert(errorMessage);
       // ...
     });
+  }
+
+  // provider.addScope('https://www.googleapis.com/auth/plus.login');
+  function signin() {
+    if (window.outerWidth>500) {
+
+
+      firebase.auth().signInWithPopup(provider).then(function(result) {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        var token = result.credential.accessToken;
+        // The signed-in user info.
+        var user = result.user;
+        // ...
+      }).catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        alert(errorMessage);
+
+        // ...
+      })
+    }
   }
   signin();
 
@@ -254,6 +288,8 @@
       //   // An error happened.
       // });
       var list = document.getElementById('other-messages');
+
+
       //
       rootRef.once("value")
       .then(function(snapshot) {
@@ -266,7 +302,9 @@
               var obj = snapshot.child('messages').val()[key];
               var line = document.createElement("li");
               line.className = "message-item";
-              list.appendChild(line);
+              // list.appendChild(line);
+              var oldListItem = document.getElementById("other-messages").firstChild;
+              list.insertBefore(line, oldListItem);
               var lineUser = document.createElement("div");
               var lineMessage = document.createElement("div");
               var linePhoto = document.createElement("div");
@@ -321,35 +359,37 @@
       message: messageVal
     })
 
-    var list = document.getElementById('other-messages');
-    //
-    var messagesRef = firebase.database().ref("messages/");
-    messagesRef.limitToLast(1).on("child_added", function(snapshot, prevChildKey) {
-      var newPost = snapshot.val();
-      // console.log(prevChildKey);
-      console.log(newPost.message);
-
-      var line = document.createElement("li");
-      line.className = "new-item";
-
-      var linePhoto = document.createElement("div");
-      linePhoto.innerHTML = '<img class="small-rect" src="'+ newPost.userphoto + '">'
-      line.appendChild(linePhoto);
-
-      var lineUser = document.createElement("div");
-      lineUser.innerHTML = "user name: " + newPost.username;
-      line.appendChild(lineUser);
-
-      var lineMessage = document.createElement("div");
-      lineMessage.innerHTML = "message: " + newPost.message;
-      line.appendChild(lineMessage);
-
-      // line.innerHTML = "message: " + newPost.message;
-      list.appendChild(line);
-
-    });
 
   }
+  var list = document.getElementById('other-messages');
+  //
+  var messagesRef = firebase.database().ref("messages/");
+  messagesRef.limitToLast(1).on("child_added", function(snapshot, prevChildKey) {
+    var newPost = snapshot.val();
+    // console.log(prevChildKey);
+    console.log(newPost.message);
+    console.log(prevChildKey);
+
+    var line = document.createElement("li");
+    line.className = "new-item";
+
+    var linePhoto = document.createElement("div");
+    linePhoto.innerHTML = '<img class="small-rect" src="'+ newPost.userphoto + '">'
+    line.appendChild(linePhoto);
+
+    var lineUser = document.createElement("div");
+    lineUser.innerHTML = "user name: " + newPost.username;
+    line.appendChild(lineUser);
+
+    var lineMessage = document.createElement("div");
+    lineMessage.innerHTML = "message: " + newPost.message;
+    line.appendChild(lineMessage);
+
+    // line.innerHTML = "message: " + newPost.message;
+    var oldItem = document.getElementById("other-messages").firstChild;
+    list.insertBefore(line, oldItem);
+
+  });
 
 
   function signout() {
